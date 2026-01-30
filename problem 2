@@ -1,0 +1,99 @@
+const readline = require("readline").createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+function isPrime(n) {
+    if (n < 2) return false;
+    for (let i = 2; i * i <= n; i++)
+        if (n % i === 0) return false;
+    return true;
+}
+
+
+function buildZn(n) {
+    return Array.from({ length: n }, (_, i) => i);
+}
+
+function checkClosure(set, n) {
+    for (let a of set) {
+        for (let b of set) {
+            if (!set.includes((a + b) % n)) return false;
+            if (!set.includes((a * b) % n)) return false;
+        }
+    }
+    return true;
+}
+
+
+function checkAdditiveInverse(set, n) {
+    for (let a of set) {
+        let inverse = (n - a) % n;
+        if (!set.includes(inverse)) return false;
+    }
+    return true;
+}
+
+function checkMultiplicativeInverse(set, n) {
+    for (let a of set) {
+        if (a === 0) continue;
+        let found = false;
+        for (let b of set) {
+            if ((a * b) % n === 1) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) return false;
+    }
+    return true;
+}
+
+function checkDistributive(set, n) {
+    for (let a of set) {
+        for (let b of set) {
+            for (let c of set) {
+                let left = (a * ((b + c) % n)) % n;
+                let right = ((a * b) % n + (a * c) % n) % n;
+                if (left !== right) return false;
+            }
+        }
+    }
+    return true;
+}
+
+readline.question("Enter modulus n: ", (x) => {
+
+    let n = parseInt(x);
+    let Zn = buildZn(n);
+
+    console.log(`\nAnalyzing Z_${n} =`, Zn);
+
+    console.log("\n--- GROUP UNDER ADDITION ---");
+    console.log("Closure:", checkClosure(Zn, n));
+    console.log("Identity exists (0):", Zn.includes(0));
+    console.log("Additive inverse:", checkAdditiveInverse(Zn, n));
+    console.log("Associativity: TRUE (property of integers)");
+
+    console.log("\n--- RING CHECK ---");
+    console.log("Distributive property:", checkDistributive(Zn, n));
+
+    console.log("\n--- FIELD CHECK ---");
+    if (isPrime(n) && checkMultiplicativeInverse(Zn, n)) {
+        console.log("Z_n is a FIELD");
+    } else {
+        console.log("Z_n is NOT a field");
+    }
+
+    console.log("\n--- MODULAR DEMO ---");
+    console.log("3 + 5 mod n =", (3 + 5) % n);
+    console.log("3 * 5 mod n =", (3 * 5) % n);
+    console.log("7^4 mod n =", (7 ** 4) % n);
+
+    console.log("\n--- CRYPTO IMPORTANCE ---");
+    console.log("Fields enable RSA & ElGamal");
+    console.log("Groups support key exchange");
+    console.log("Rings structure modular arithmetic");
+
+    readline.close();
+});

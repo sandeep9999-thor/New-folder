@@ -1,0 +1,93 @@
+const readline = require("readline").createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+function isPrime(n) {
+    if (n < 2) return false;
+    for (let i = 2; i * i <= n; i++)
+        if (n % i === 0) return false;
+    return true;
+}
+
+function gcd(a, b) {
+    while (b !== 0) {
+        [a, b] = [b, a % b];
+    }
+    return a;
+}
+
+function eulerPhi(n) {
+    let result = n;
+    for (let p = 2; p * p <= n; p++) {
+        if (n % p === 0) {
+            while (n % p === 0) n /= p;
+            result -= result / p;
+        }
+    }
+    if (n > 1) result -= result / n;
+    return Math.floor(result);
+}
+
+function modExp(base, exp, mod) {
+    let result = 1;
+    base %= mod;
+
+    while (exp > 0) {
+        if (exp % 2 === 1)
+            result = (result * base) % mod;
+
+        base = (base * base) % mod;
+        exp = Math.floor(exp / 2);
+    }
+
+    return result;
+}
+
+readline.question("Enter first positive integer: ", (x) => {
+    readline.question("Enter second positive integer: ", (y) => {
+
+        let a = parseInt(x);
+        let b = parseInt(y);
+
+        console.log("\n--- PRIME CHECK ---");
+        console.log(`${a} is prime?`, isPrime(a));
+        console.log(`${b} is prime?`, isPrime(b));
+
+        console.log("\n--- GCD ---");
+        let g = gcd(a, b);
+        console.log("GCD:", g);
+
+        console.log("\n--- CO-PRIME CHECK ---");
+        let coprime = g === 1;
+        console.log("Co-prime?", coprime);
+
+        if (coprime) {
+            console.log("\n--- EULER PHI ---");
+            console.log(`phi(${a}) =`, eulerPhi(a));
+            console.log(`phi(${b}) =`, eulerPhi(b));
+        }
+
+        console.log("\n--- FERMAT'S LITTLE THEOREM ---");
+        if (isPrime(b)) {
+            console.log(`a^(b-1) mod b =`, modExp(a, b - 1, b));
+        } else {
+            console.log("Cannot verify: second number not prime");
+        }
+
+        console.log("\n--- EULER'S THEOREM ---");
+        if (coprime) {
+            let phi = eulerPhi(b);
+            console.log(`a^phi(b) mod b =`, modExp(a, phi, b));
+        } else {
+            console.log("Cannot verify: numbers not co-prime");
+        }
+
+        console.log("\n--- MODULAR ARITHMETIC ---");
+        console.log("(a + b) mod b =", (a + b) % b);
+        console.log("(a * b) mod b =", (a * b) % b);
+        console.log("a^b mod b =", modExp(a, b, b));
+
+        readline.close();
+    });
+});
